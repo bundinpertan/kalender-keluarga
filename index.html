@@ -1,0 +1,1386 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Kalender Keluarga</title>
+<link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,400&family=DM+Sans:wght@300;400;500;700&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --bg:#f5f2ec; --bg2:#ffffff; --bg3:#eef6f4; --bg4:#f0faf8;
+  --surface:#ffffff; --surface2:#eef6f4;
+  --border:#cce4de; --border2:#e2ece8;
+  --text:#1a3530; --text2:#3d6b62; --text3:#7aA8a0;
+  --accent:#2d7a6a; --accent2:#1f5a4e;
+  --accent-bg:#e0f2ee; --accent-bg2:#c8eae4;
+  --today-bg:#e0f2ee; --today-border:#2d7a6a;
+  --warn:#c0622a; --warn-bg:#fdeee6;
+  --header-bg:#ffffff; --header-border:#cce4de;
+  --shadow:0 2px 12px #2d7a6a12; --shadow2:0 6px 24px #2d7a6a18;
+  --note-color:#7aa8a044;
+  --dot-miladi:#2563eb;
+  --dot-hijri:#16a34a;
+  --dot-weton:#ca8a04;
+  --radius:10px;
+}
+body.tema-gelap {
+  --bg:#0f1117; --bg2:#141720; --bg3:#1a1d2a; --bg4:#1e2130;
+  --surface:#141720; --surface2:#1a1d2a;
+  --border:#c8956c22; --border2:#ffffff08;
+  --text:#e8dcc8; --text2:#c8b89a; --text3:#888878;
+  --accent:#c8956c; --accent2:#e0a878;
+  --accent-bg:#c8956c22; --accent-bg2:#c8956c33;
+  --today-bg:#c8956c22; --today-border:#c8956c99;
+  --warn:#e87c5c; --warn-bg:#e87c5c22;
+  --header-bg:#1a1d2a; --header-border:#c8956c33;
+  --shadow:0 2px 16px #00000033; --shadow2:0 6px 28px #00000044;
+  --dot-miladi:#3b82f6;
+  --dot-hijri:#22c55e;
+  --dot-weton:#eab308;
+  --note-color:#c8956c33;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{min-height:100vh;background:var(--bg);font-family:'DM Sans',sans-serif;color:var(--text);transition:background .3s,color .3s;-webkit-tap-highlight-color:transparent}
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--accent-bg2);border-radius:4px}
+input,select,textarea{outline:none;font-family:inherit}
+input:focus,select:focus,textarea:focus{border-color:var(--accent)!important}
+button{font-family:inherit;cursor:pointer}
+
+/* HEADER */
+#header{background:var(--header-bg);border-bottom:1px solid var(--header-border);padding:10px 14px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:20;box-shadow:var(--shadow);transition:background .3s,border-color .3s}
+#header-title{font-family:'Crimson Pro',serif;font-size:20px;color:var(--accent);letter-spacing:.5px;font-weight:600}
+#header-sub{font-size:10px;color:var(--text3);letter-spacing:1.5px;margin-top:1px;font-weight:400}
+.header-right{display:flex;gap:6px;align-items:center}
+.tab-btn{background:transparent;border:1px solid transparent;color:var(--text3);border-radius:18px;padding:6px 11px;font-size:12px;transition:all .2s;font-weight:500}
+.tab-btn.active{background:var(--accent-bg);border-color:var(--accent-bg2);color:var(--accent);font-weight:700}
+#theme-btn{background:var(--accent-bg);border:1px solid var(--accent-bg2);color:var(--accent);border-radius:50%;width:32px;height:32px;font-size:14px;transition:all .2s;position:relative}
+#theme-btn:hover{background:var(--accent-bg2)}
+#theme-dropdown{position:absolute;top:calc(100% + 8px);right:0;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:8px;box-shadow:var(--shadow2);display:none;z-index:100;min-width:180px;animation:popIn .15s ease}
+#theme-dropdown.open{display:block}
+@keyframes popIn{from{opacity:0;transform:scale(.95) translateY(-4px)}to{opacity:1;transform:none}}
+.theme-option{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;cursor:pointer;transition:background .15s;font-size:13px;color:var(--text)}
+.theme-option:hover{background:var(--accent-bg)}
+.theme-option.active-theme{background:var(--accent-bg);color:var(--accent);font-weight:700}
+.theme-dot{width:12px;height:12px;border-radius:50%;flex-shrink:0}
+.theme-check{margin-left:auto;font-size:12px;color:var(--accent)}
+
+/* LEGEND */
+#legend{display:flex;gap:14px;align-items:center;padding:8px 16px;background:var(--surface);border-bottom:1px solid var(--border2);flex-wrap:wrap}
+.legend-item{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text3)}
+.legend-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+
+/* PAGES */
+.page{display:none;max-width:540px;margin:0 auto;padding:14px 12px}
+.page.active{display:block}
+
+/* UPCOMING */
+#upcoming-box{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px 14px;margin-bottom:12px;display:none;box-shadow:var(--shadow)}
+#upcoming-title{font-size:10px;color:var(--accent);letter-spacing:2px;margin-bottom:8px;font-family:'Crimson Pro',serif;font-weight:600}
+.upcoming-row{display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid var(--border2)}
+.upcoming-row:last-child{border-bottom:none}
+.upcoming-days{font-size:12px;color:var(--accent);font-weight:700}
+.upcoming-days.soon{color:var(--warn)}
+
+/* CAL NAV */
+#cal-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.nav-btn{background:var(--accent-bg);border:1px solid var(--border);color:var(--accent);border-radius:8px;width:34px;height:34px;font-size:18px;transition:all .2s}
+.nav-btn:hover{background:var(--accent-bg2)}
+#cal-month{font-family:'Crimson Pro',serif;font-size:22px;color:var(--text);text-align:center;letter-spacing:.3px;font-weight:600}
+#cal-hijri-header{font-size:11px;color:var(--accent);text-align:center;margin-top:2px;font-style:italic}
+
+/* OFFSET */
+#offset-bar{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:8px 14px;margin-bottom:10px;display:flex;align-items:center;gap:10px;box-shadow:var(--shadow)}
+#offset-label{font-size:10px;color:var(--text3);letter-spacing:1.5px;font-weight:700}
+#offset-note{font-size:10px;color:var(--note-color);margin-top:1px}
+.offset-ctrl{display:flex;align-items:center;gap:8px;margin-left:auto}
+.off-btn{background:var(--accent-bg);border:1px solid var(--border);color:var(--accent);border-radius:7px;width:26px;height:26px;font-size:16px;line-height:1;transition:all .2s}
+.off-btn:hover{background:var(--accent-bg2)}
+#offset-val{font-size:15px;color:var(--text);min-width:24px;text-align:center;font-weight:700}
+
+/* GRID */
+#day-headers{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:3px}
+.day-hdr{text-align:center;font-size:10px;color:var(--text3);letter-spacing:.5px;padding:3px 0;font-weight:700}
+.day-hdr.ahad{color:#dc2626}
+.day-hdr.jumat{color:#16a34a}
+#cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
+.cal-day{border:1px solid var(--border2);border-radius:8px;padding:3px 3px 2px;min-height:68px;background:var(--surface);text-align:center;transition:all .15s;position:relative;cursor:pointer;display:flex;flex-direction:column;align-items:center}
+.cal-day:hover{background:var(--accent-bg);border-color:var(--border)}
+.cal-day.selected{background:var(--accent-bg2);border-color:var(--accent)}
+.cal-day.today-day{border-color:var(--today-border);border-width:1.5px;background:var(--today-bg)}
+.cal-day.overflow-day{background:transparent;border-color:transparent;cursor:default}
+.cal-day.overflow-day:hover{background:transparent}
+/* baris atas: hijri arab + miladiyah */
+.day-top{display:flex;align-items:baseline;justify-content:center;gap:2px;width:100%;line-height:1}
+.day-hijri-ar{font-size:13px;color:var(--text);font-weight:600;opacity:.75;line-height:1;margin-top:1px}
+.day-num{font-size:19px;color:var(--text);font-weight:700;line-height:1.1}
+.day-num.today-num{color:var(--accent)}
+.day-num.ahad-num{color:#dc2626}
+.day-num.jumat-num{color:#16a34a}
+.day-num.overflow-num{color:var(--text3);opacity:.35;font-weight:400}
+/* warna Arab ikut warna hari */
+.ahad-day .day-hijri-ar{color:#dc2626}
+.jumat-day .day-hijri-ar{color:#16a34a}
+/* pasaran */
+.day-pas{font-size:9px;color:var(--text3);margin-top:2px;line-height:1;letter-spacing:-.2px;max-width:100%;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;padding:0 1px}
+/* dots */
+.dot-row{display:flex;justify-content:center;gap:3px;margin-top:2px;padding-bottom:0px;flex-wrap:nowrap}
+.dot{border-radius:50%;flex-shrink:0}
+.dot-miladi{width:6px;height:6px;background:var(--dot-miladi)}
+.dot-hijri{width:6px;height:6px;background:var(--dot-hijri)}
+.dot-weton{width:6px;height:6px;background:var(--dot-weton)}
+.hijri-note{display:none}
+/* today badge style */
+.cal-day.today-day .day-num{background:var(--accent);color:#fff;border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-size:14px;margin:0 auto}
+.cal-day.today-day .day-num.ahad-num{background:#dc2626;color:#fff}
+.cal-day.today-day .day-num.jumat-num{background:#16a34a;color:#fff}
+
+/* DAY DETAIL */
+#day-detail{margin-top:12px;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px;display:none;animation:fadeIn .2s ease;box-shadow:var(--shadow)}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1}}
+#day-detail-title{font-family:'Crimson Pro',serif;font-size:18px;color:var(--accent);margin-bottom:10px;font-weight:600}
+.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.info-card{background:var(--bg);border-radius:8px;padding:10px 12px;border:1px solid var(--border2)}
+.info-card.highlight{border-color:var(--warn);background:var(--warn-bg)}
+.info-lbl{font-size:9px;color:var(--text3);letter-spacing:2px;margin-bottom:4px;font-weight:700}
+.info-val{font-size:15px;color:var(--text);font-family:'Crimson Pro',serif;font-weight:600}
+.info-val.highlight{color:var(--warn);font-weight:700}
+.info-sub{font-size:11px;color:var(--text3);margin-top:2px}
+
+/* MARKER SECTION in day detail */
+.marker-section{margin-top:14px}
+.marker-section-title{font-size:10px;color:var(--text3);letter-spacing:2px;font-weight:700;margin-bottom:8px}
+.marker-item{display:flex;align-items:center;gap:12px;background:var(--bg);border-radius:10px;padding:10px 14px;margin-bottom:7px;cursor:pointer;border:1px solid var(--border2);transition:background .15s}
+.marker-item:hover{background:var(--accent-bg)}
+.marker-badge{font-size:10px;font-weight:700;letter-spacing:1px;padding:2px 8px;border-radius:10px;flex-shrink:0}
+.badge-miladi{background:#2563eb18;color:#2563eb}
+.badge-hijri{background:#16a34a18;color:#16a34a}
+.badge-weton{background:#ca8a0418;color:#ca8a04}
+body.tema-gelap .badge-miladi{background:#3b82f622;color:#3b82f6}
+body.tema-gelap .badge-hijri{background:#22c55e22;color:#22c55e}
+body.tema-gelap .badge-weton{background:#eab30822;color:#eab308}
+.marker-name{font-size:15px;color:var(--text)}
+.marker-meta{font-size:11px;color:var(--text3);margin-top:2px}
+
+/* FAMILY */
+#fam-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+#fam-title{font-family:'Crimson Pro',serif;font-size:20px;color:var(--text);font-weight:600}
+.fam-actions{display:flex;gap:6px}
+#add-btn{background:var(--accent);border:none;color:#fff;border-radius:9px;padding:8px 16px;font-size:13px;font-weight:700;transition:all .2s}
+#add-btn:hover{background:var(--accent2)}
+.icon-btn{background:var(--accent-bg);border:1px solid var(--border);color:var(--accent);border-radius:10px;padding:9px 12px;font-size:15px;transition:all .2s}
+.icon-btn:hover{background:var(--accent-bg2)}
+.role-section{margin-bottom:20px}
+.role-label{font-size:11px;letter-spacing:2px;margin-bottom:10px;font-weight:700;display:flex;align-items:center;gap:6px}
+.role-label::after{content:'';flex:1;height:1px;background:var(--border2)}
+.fam-card{background:var(--surface);border-radius:12px;padding:14px 16px;margin-bottom:8px;cursor:pointer;transition:all .15s;display:flex;justify-content:space-between;align-items:center;border:1px solid var(--border2);box-shadow:var(--shadow)}
+.fam-card:hover{transform:translateY(-2px);box-shadow:var(--shadow2)}
+.fam-name{font-size:17px;color:var(--text)}
+.fam-meta{font-size:12px;color:var(--text3);margin-top:3px}
+.fam-right{display:flex;align-items:center;gap:8px}
+.fam-days{font-size:13px;color:var(--accent);font-weight:700}
+.fam-days.soon{color:var(--warn)}
+.fam-markers{display:flex;gap:3px}
+.fam-marker-dot{width:7px;height:7px;border-radius:50%}
+
+/* DETAIL PAGE */
+#detail-page{display:none;max-width:540px;margin:0 auto;padding:14px 12px}
+#back-btn{background:var(--accent-bg);border:1px solid var(--border);color:var(--accent);border-radius:9px;padding:7px 14px;font-size:13px;margin-bottom:14px;transition:all .2s}
+#back-btn:hover{background:var(--accent-bg2)}
+#detail-card{background:var(--surface);border-radius:14px;padding:20px;border:1px solid var(--border);box-shadow:var(--shadow2)}
+#detail-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px}
+#detail-name{font-family:'Crimson Pro',serif;font-size:26px;color:var(--text);font-weight:600}
+#detail-role{font-size:12px;letter-spacing:1px;margin-top:3px;font-weight:700}
+.detail-actions{display:flex;gap:8px;flex-shrink:0;margin-left:12px}
+.edit-btn{background:var(--accent-bg);border:1px solid var(--border);color:var(--accent);border-radius:8px;padding:7px 14px;font-size:13px}
+.edit-btn:hover{background:var(--accent-bg2)}
+.del-btn{background:var(--warn-bg);border:1px solid var(--warn);color:var(--warn);border-radius:8px;padding:7px 14px;font-size:13px;opacity:.7}
+.del-btn:hover{opacity:1}
+#detail-infos{display:grid;gap:8px}
+
+/* TOGGLE MARKERS */
+#marker-toggles{margin-top:18px;background:var(--bg);border-radius:12px;padding:16px;border:1px solid var(--border2)}
+#marker-toggles-title{font-size:11px;color:var(--text3);letter-spacing:2px;font-weight:700;margin-bottom:12px}
+.toggle-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border2)}
+.toggle-row:last-child{border-bottom:none}
+.toggle-label{display:flex;align-items:center;gap:10px;font-size:15px;color:var(--text)}
+.toggle-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.toggle-sub{font-size:11px;color:var(--text3);margin-top:2px}
+/* iOS-style toggle switch */
+.switch{position:relative;width:44px;height:24px;flex-shrink:0}
+.switch input{opacity:0;width:0;height:0}
+.slider{position:absolute;inset:0;background:var(--border);border-radius:24px;transition:.3s;cursor:pointer}
+.slider:before{content:'';position:absolute;width:18px;height:18px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.3s;box-shadow:0 1px 4px #0003}
+.switch input:checked+.slider{background:var(--accent)}
+.switch input:checked+.slider:before{transform:translateX(20px)}
+
+/* TOGGLE WAKTU LAHIR */
+.birthtime-toggle{display:flex;gap:0;margin-bottom:16px;border-radius:9px;overflow:hidden;border:1px solid var(--border)}
+.birthtime-btn{flex:1;background:transparent;border:none;padding:10px 0;font-size:13px;font-weight:600;color:var(--text3);cursor:pointer;transition:all .2s;font-family:inherit}
+.birthtime-btn.active-siang{background:#fef3c7;color:#d97706}
+.birthtime-btn.active-malam{background:#1e1b4b;color:#a5b4fc}
+body.tema-gelap .birthtime-btn.active-siang{background:#78350f;color:#fcd34d}
+body.tema-gelap .birthtime-btn.active-malam{background:#312e81;color:#c7d2fe}
+.birthtime-warn{background:var(--warn-bg);border:1px solid var(--warn);border-radius:8px;padding:8px 12px;font-size:12px;color:var(--warn);margin-top:8px;display:flex;align-items:center;gap:6px}
+
+/* MODAL */
+#modal-overlay{position:fixed;inset:0;background:#00000066;display:none;align-items:center;justify-content:center;z-index:100;padding:16px;backdrop-filter:blur(4px)}
+#modal-overlay.open{display:flex}
+#modal-box{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:24px 20px;width:100%;max-width:380px;box-shadow:var(--shadow2);animation:popIn .2s ease}
+#modal-title{font-family:'Crimson Pro',serif;font-size:20px;color:var(--accent);margin-bottom:18px;font-weight:600}
+.form-label{font-size:10px;color:var(--text3);letter-spacing:1.5px;display:block;margin-bottom:5px;font-weight:700}
+.form-input{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:9px;padding:11px 13px;color:var(--text);font-size:14px;margin-bottom:14px;transition:border .2s;-webkit-appearance:none}
+.form-btns{display:flex;gap:8px}
+.cancel-btn{flex:1;background:transparent;border:1px solid var(--border);color:var(--text3);border-radius:9px;padding:11px;font-size:13px}
+.cancel-btn:hover{background:var(--bg)}
+.save-btn{flex:2;background:var(--accent);border:none;color:#fff;border-radius:9px;padding:11px;font-size:14px;font-weight:700}
+.save-btn:hover{background:var(--accent2)}
+
+/* IO MODAL */
+#io-overlay{position:fixed;inset:0;background:#00000066;display:none;align-items:center;justify-content:center;z-index:100;padding:16px;backdrop-filter:blur(4px)}
+#io-overlay.open{display:flex}
+#io-box{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:24px 20px;width:100%;max-width:390px;box-shadow:var(--shadow2);animation:popIn .2s ease}
+#io-title{font-family:'Crimson Pro',serif;font-size:20px;color:var(--accent);margin-bottom:4px;font-weight:600}
+#io-sub{font-size:13px;color:var(--text3);margin-bottom:16px;line-height:1.6}
+.io-btn{width:100%;background:var(--accent);border:none;color:#fff;border-radius:10px;padding:12px;font-size:14px;font-weight:700;margin-bottom:10px;transition:all .2s}
+.io-btn:hover{background:var(--accent2)}
+.io-btn.sec{background:transparent;border:1px solid var(--border);color:var(--accent);font-weight:400}
+.io-btn.sec:hover{background:var(--accent-bg)}
+
+#io-close{width:100%;background:transparent;border:1px solid var(--border2);color:var(--text3);border-radius:10px;padding:11px;font-size:13px}
+#io-close:hover{border-color:var(--border);color:var(--text)}
+#io-msg{font-size:13px;margin-bottom:12px;padding:10px 14px;border-radius:10px;display:none;line-height:1.5}
+#io-msg.ok{background:#d0f0e8;border:1px solid #5b9e8f;color:#2d6a5a}
+body.tema-gelap #io-msg.ok{background:#5b9e8f22;border-color:#5b9e8f55;color:#5b9e8f}
+#io-msg.err{background:var(--warn-bg);border:1px solid var(--warn);color:var(--warn)}
+
+/* ── KONVERSI TANGGAL ── */
+#konv-overlay{position:fixed;inset:0;background:#00000066;display:none;align-items:flex-end;justify-content:center;z-index:100;backdrop-filter:blur(4px)}
+#konv-overlay.open{display:flex}
+#konv-box{background:var(--surface);border:1px solid var(--border);border-radius:18px 18px 0 0;padding:22px 20px 32px;width:100%;max-width:540px;box-shadow:var(--shadow2);animation:slideUp .25s ease}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+#konv-handle{width:36px;height:4px;background:var(--border);border-radius:4px;margin:0 auto 18px}
+#konv-title{font-family:'Crimson Pro',serif;font-size:20px;color:var(--accent);margin-bottom:4px;font-weight:600}
+#konv-sub{font-size:12px;color:var(--text3);margin-bottom:16px}
+#konv-input{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:9px;padding:11px 13px;color:var(--text);font-size:15px;margin-bottom:12px;-webkit-appearance:none;font-family:inherit;color-scheme:light dark}
+#konv-result{display:none;animation:fadeIn .2s ease}
+.konv-cards{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+.konv-card{background:var(--bg);border:1px solid var(--border2);border-radius:10px;padding:12px 14px;text-align:center}
+.konv-card-lbl{font-size:9px;color:var(--text3);letter-spacing:2px;font-weight:700;margin-bottom:4px}
+.konv-card-val{font-family:'Crimson Pro',serif;font-size:17px;color:var(--text);font-weight:600;line-height:1.2}
+.konv-card-sub{font-size:10px;color:var(--text3);margin-top:2px}
+.konv-neptu{background:var(--accent-bg);border:1px solid var(--border);border-radius:10px;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.konv-neptu-label{font-size:11px;color:var(--text3);letter-spacing:1px;font-weight:700}
+.konv-neptu-val{font-family:'Crimson Pro',serif;font-size:22px;color:var(--accent);font-weight:600}
+.konv-neptu-detail{font-size:11px;color:var(--text3);margin-top:2px}
+#konv-share-btn{width:100%;background:var(--accent);border:none;color:#fff;border-radius:9px;padding:12px;font-size:14px;font-weight:700;transition:all .2s;margin-bottom:8px}
+#konv-share-btn:hover{background:var(--accent2)}
+#konv-close{width:100%;background:transparent;border:1px solid var(--border2);color:var(--text3);border-radius:9px;padding:10px;font-size:13px}
+#konv-close:hover{border-color:var(--border);color:var(--text)}
+
+/* ── KARTU EXPORT MODAL ── */
+#kartu-overlay{position:fixed;inset:0;background:#00000088;display:none;align-items:center;justify-content:center;z-index:110;padding:16px;backdrop-filter:blur(8px)}
+#kartu-overlay.open{display:flex}
+#kartu-box{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:20px;width:100%;max-width:400px;box-shadow:var(--shadow2);animation:popIn .2s ease;text-align:center}
+#kartu-title{font-family:'Crimson Pro',serif;font-size:18px;color:var(--accent);margin-bottom:14px;font-weight:600}
+#kartu-canvas{border-radius:12px;max-width:100%;box-shadow:0 4px 20px #0003;margin-bottom:14px}
+#kartu-save-btn{background:var(--accent);border:none;color:#fff;border-radius:9px;padding:11px 24px;font-size:14px;font-weight:700;margin-right:8px;transition:all .2s}
+#kartu-save-btn:hover{background:var(--accent2)}
+#kartu-close2{background:transparent;border:1px solid var(--border);color:var(--text3);border-radius:9px;padding:11px 20px;font-size:13px}
+
+/* Konversi btn di kalender */
+#konv-fab{position:fixed;bottom:20px;right:16px;background:var(--accent);border:none;color:#fff;border-radius:50%;width:48px;height:48px;font-size:20px;box-shadow:0 4px 18px #2d7a6a40;z-index:50;transition:all .2s;display:flex;align-items:center;justify-content:center}
+body.tema-gelap #konv-fab{background:var(--accent);box-shadow:0 4px 18px #c8956c40}
+#konv-fab:hover{transform:scale(1.08)}
+</style>
+</head>
+<body>
+
+<div id="header">
+  <div>
+    <div id="header-title">Kalender Keluarga</div>
+    <div id="header-sub">Masehi · Hijriyah · Jawa</div>
+  </div>
+  <div class="header-right">
+    <button class="tab-btn active" onclick="showPage('calendar')">📅 Kalender</button>
+    <button class="tab-btn" onclick="showPage('family')">👨‍👩‍👧‍👦 Keluarga</button>
+    <div style="position:relative">
+      <button id="theme-btn" onclick="toggleThemeDropdown(event)" title="Ganti Tema">🎨</button>
+      <div id="theme-dropdown">
+        <div class="theme-option active-theme" onclick="setTheme('cahaya')" id="opt-cahaya">
+          <div class="theme-dot" style="background:#2d7a6a"></div><span>Cahaya Pagi</span>
+          <span class="theme-check">✓</span>
+        </div>
+        <div class="theme-option" onclick="setTheme('gelap')" id="opt-gelap">
+          <div class="theme-dot" style="background:#c8956c"></div><span>Gelap</span>
+          <span class="theme-check" style="display:none">✓</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LEGEND -->
+<div id="legend">
+  <div class="legend-item"><div class="legend-dot" style="background:var(--dot-miladi)"></div>Ultah Masehi</div>
+  <div class="legend-item"><div class="legend-dot" style="background:var(--dot-hijri)"></div>Ultah Hijriyah</div>
+  <div class="legend-item"><div class="legend-dot" style="background:var(--dot-weton)"></div>Weton</div>
+  <div style="margin-left:auto;font-size:10px;color:var(--text3);cursor:pointer;padding:2px 6px;border-radius:6px;border:1px solid var(--border2)" onclick="openKonv()">🔍 Konversi</div>
+</div>
+
+<!-- KALENDER -->
+<div id="page-calendar" class="page active">
+  <div id="upcoming-box">
+    <div id="upcoming-title">🎂 ULANG TAHUN MENDATANG</div>
+    <div id="upcoming-list"></div>
+  </div>
+  <div id="cal-nav">
+    <button class="nav-btn" onclick="changeMonth(-1)">‹</button>
+    <div>
+      <div id="cal-month"></div>
+      <div id="cal-hijri-header"></div>
+    </div>
+    <button class="nav-btn" onclick="changeMonth(1)">›</button>
+  </div>
+  <div id="offset-bar">
+    <div>
+      <div id="offset-label">KOREKSI HIJRIYAH</div>
+      <div id="offset-note">Sesuaikan dengan ketetapan Kemenag</div>
+    </div>
+    <div class="offset-ctrl">
+      <button class="off-btn" onclick="changeOffset(-1)">−</button>
+      <div id="offset-val">0</div>
+      <button class="off-btn" onclick="changeOffset(1)">+</button>
+    </div>
+  </div>
+  <div id="day-headers">
+    <div class="day-hdr ahad">Ahad</div><div class="day-hdr">Sen</div><div class="day-hdr">Sel</div>
+    <div class="day-hdr">Rab</div><div class="day-hdr">Kam</div><div class="day-hdr jumat">Jum</div>
+    <div class="day-hdr">Sab</div>
+  </div>
+  <div id="cal-grid"></div>
+  <div class="hijri-note">Hijriyah: hisab Umm al-Qura + koreksi manual. Sesuaikan dengan ketetapan Kemenag.</div>
+  <div id="day-detail">
+    <div id="day-detail-title"></div>
+    <div class="detail-grid" id="day-detail-grid"></div>
+    <div id="day-marker-section"></div>
+    <button onclick="buatKartuDariKalender()" style="margin-top:10px;width:100%;background:var(--accent-bg);border:1px solid var(--border);color:var(--accent);border-radius:9px;padding:9px;font-size:13px;font-weight:600;transition:all .2s" onmouseover="this.style.background='var(--accent-bg2)'" onmouseout="this.style.background='var(--accent-bg)'">🖼 Buat Kartu Tanggal Ini</button>
+  </div>
+</div>
+
+<!-- KELUARGA -->
+<div id="page-family" class="page">
+  <div id="fam-header">
+    <div id="fam-title">Anggota Keluarga</div>
+    <div class="fam-actions">
+      <button class="icon-btn" onclick="openIO()" title="Ekspor / Impor">📤</button>
+      <button id="add-btn" onclick="openForm()">+ Tambah</button>
+    </div>
+  </div>
+  <div id="fam-list"></div>
+</div>
+
+<!-- DETAIL -->
+<div id="detail-page">
+  <button id="back-btn" onclick="closeDetail()">← Kembali</button>
+  <div id="detail-card">
+    <div id="detail-header">
+      <div><div id="detail-name"></div><div id="detail-role"></div></div>
+      <div class="detail-actions">
+        <button class="edit-btn" onclick="editCurrent()">Edit</button>
+        <button class="del-btn" onclick="deleteCurrent()">Hapus</button>
+      </div>
+    </div>
+    <div id="detail-infos"></div>
+    <button id="detail-kartu-btn" onclick="buatKartuAnggota()" style="margin-top:10px;width:100%;background:var(--accent-bg);border:1px solid var(--border);color:var(--accent);border-radius:9px;padding:9px;font-size:13px;font-weight:600;display:none">🖼 Buat Kartu Tanggal Lahir</button>
+    <!-- TOGGLE MARKERS -->
+    <div id="marker-toggles">
+      <div id="marker-toggles-title">TANDAI DI KALENDER</div>
+      <div class="toggle-row">
+        <div class="toggle-label">
+          <div class="toggle-dot" style="background:var(--dot-hijri)"></div>          <div>
+            <div>Ulang Tahun Hijriyah</div>
+            <div class="toggle-sub">Tandai tanggal Hijriyah lahir setiap tahun</div>
+          </div>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="toggle-hijri" onchange="saveToggle('hijri')">
+          <span class="slider"></span>
+        </label>
+      </div>
+      <div class="toggle-row">
+        <div class="toggle-label">
+          <div class="toggle-dot" style="background:var(--dot-weton)"></div>
+          <div>
+            <div>Hari Weton</div>
+            <div class="toggle-sub">Tandai setiap hari weton berulang (tiap 35 hari)</div>
+          </div>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="toggle-weton" onchange="saveToggle('weton')">
+          <span class="slider"></span>
+        </label>
+      </div>
+    </div>
+    <div class="hijri-note" style="margin-top:16px">Hijriyah: hisab Umm al-Qura · bisa ±1 hari dari ketetapan Kemenag.</div>
+  </div>
+</div>
+
+<!-- FORM MODAL -->
+<div id="modal-overlay" onclick="if(event.target===this)closeForm()">
+  <div id="modal-box">
+    <div id="modal-title">Tambah Anggota</div>
+    <label class="form-label">NAMA</label>
+    <input id="f-name" class="form-input" placeholder="Nama lengkap"/>
+    <label class="form-label">PERAN</label>
+    <select id="f-role" class="form-input">
+      <option>Saya</option><option>Istri</option><option>Anak</option>
+      <option>Orang Tua</option><option>Saudara</option><option>Lainnya</option>
+    </select>
+    <label class="form-label">TANGGAL LAHIR</label>
+    <input id="f-date" class="form-input" type="date" style="color-scheme:light dark;margin-bottom:12px"/>
+    <label class="form-label">WAKTU LAHIR</label>
+    <div class="birthtime-toggle">
+      <button class="birthtime-btn" id="btn-siang" onclick="setBirthtime('siang')">☀️ Siang</button>
+      <button class="birthtime-btn" id="btn-malam" onclick="setBirthtime('malam')">🌙 Malam</button>
+    </div>
+    <div style="font-size:11px;color:var(--text3);margin-top:-10px;margin-bottom:14px;line-height:1.5">Malam = setelah maghrib. Weton & Hijriyah dihitung dari hari berikutnya.</div>
+    <div class="form-btns">
+      <button class="cancel-btn" onclick="closeForm()">Batal</button>
+      <button class="save-btn" onclick="submitForm()">Simpan</button>
+    </div>
+  </div>
+</div>
+
+<!-- IO MODAL -->
+<div id="io-overlay" onclick="if(event.target===this)closeIO()">
+  <div id="io-box">
+    <div id="io-title">Data Keluarga</div>
+    <div id="io-sub">Ekspor untuk backup atau pindah perangkat.<br>Impor untuk memuat data dari file backup.</div>
+    <div id="io-msg"></div>
+    <button class="io-btn" onclick="doExport()">⬇ Ekspor / Unduh Backup (.json)</button>
+    <button class="io-btn sec" onclick="triggerImport()">📤 Impor File .json</button>
+    <input type="file" id="import-file-input" accept=".json" style="display:none" onchange="doImportFile(event)"/>
+    <button id="io-close" onclick="closeIO()">Tutup</button>
+  </div>
+</div>
+
+<!-- FAB KONVERSI -->
+<button id="konv-fab" onclick="openKonv()" title="Konversi Tanggal">🔍</button>
+
+<!-- KONVERSI TANGGAL MODAL -->
+<div id="konv-overlay" onclick="if(event.target===this)closeKonv()">
+  <div id="konv-box">
+    <div id="konv-handle"></div>
+    <div id="konv-title">Konversi Tanggal</div>
+    <div id="konv-sub">Masukkan tanggal Masehi untuk melihat Hijriyah, Weton, dan Neptu</div>
+    <input type="date" id="konv-input" oninput="doKonv()" style="color-scheme:light dark"/>
+    <div id="konv-result">
+      <div class="konv-cards">
+        <div class="konv-card">
+          <div class="konv-card-lbl">HARI</div>
+          <div class="konv-card-val" id="kr-hari">—</div>
+        </div>
+        <div class="konv-card">
+          <div class="konv-card-lbl">PASARAN</div>
+          <div class="konv-card-val" id="kr-pasaran">—</div>
+        </div>
+        <div class="konv-card" style="grid-column:1/-1">
+          <div class="konv-card-lbl">HIJRIYAH</div>
+          <div class="konv-card-val" id="kr-hijri">—</div>
+          <div class="konv-card-sub" id="kr-hijri-sub"></div>
+        </div>
+      </div>
+      <div class="konv-neptu">
+        <div>
+          <div class="konv-neptu-label">NEPTU WETON</div>
+          <div class="konv-neptu-detail" id="kr-neptu-detail">—</div>
+        </div>
+        <div class="konv-neptu-val" id="kr-neptu">—</div>
+      </div>
+      <button id="konv-share-btn" onclick="buatKartu()">🖼 Buat & Simpan Kartu</button>
+    </div>
+    <button id="konv-close" onclick="closeKonv()">Tutup</button>
+  </div>
+</div>
+
+<!-- KARTU EXPORT MODAL -->
+<div id="kartu-overlay" onclick="if(event.target===this)closeKartu()">
+  <div id="kartu-box">
+    <div id="kartu-title">Kartu Tanggal</div>
+    <canvas id="kartu-canvas" width="720" height="480"></canvas>
+    <div>
+      <button id="kartu-save-btn" onclick="simpanKartu()">⬇ Simpan Gambar</button>
+      <button id="kartu-close2" onclick="closeKartu()">Tutup</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── KONSTANTA ──────────────────────────────────────────────────────────────
+const PASARAN=["Legi","Pahing","Pon","Wage","Kliwon"];
+
+// Konverter angka ke Arab-Indik (٠١٢٣٤٥٦٧٨٩)
+function toArabic(n){
+  return String(n).replace(/[0-9]/g,d=>'٠١٢٣٤٥٦٧٨٩'[d]);
+}
+const DAYS_ID=["Ahad","Senin","Selasa","Rabu","Kamis","Jumat","Sabtu"];
+const MONTHS_ID=["Januari","Februari","Maret","April","Mei","Juni","Juli","Agustus","September","Oktober","November","Desember"];
+const HIJRI_MONTHS=["Muharram","Safar","Rabi'ul Awal","Rabi'ul Akhir","Jumadil Awal","Jumadil Akhir","Rajab","Sya'ban","Ramadhan","Syawal","Dzulqa'dah","Dzulhijjah"];
+const ROLE_COLOR={Saya:"#c8956c",Istri:"#c06b8a",Anak:"#5b9e8f","Orang Tua":"#7b7ec8",Saudara:"#c8a83c",Lainnya:"#888"};
+const ROLES=Object.keys(ROLE_COLOR);
+const STORAGE_KEY="kal-kel-v3";
+const OFFSET_KEY="kal-offset-v1";
+const THEME_KEY="kal-tema-v1";
+
+// Ambil tanggal efektif untuk hitung weton & hijriyah
+// Jika lahir malam → geser +1 hari
+function getBirthEffectiveDate(birthdate, birthtime){
+  const[y,m,d]=birthdate.split('-').map(Number);
+  if(birthtime==='malam'){
+    const dt=new Date(y,m-1,d);
+    dt.setDate(dt.getDate()+1);
+    return dt;
+  }
+  return new Date(y,m-1,d);
+}
+
+// ── TEMA ──────────────────────────────────────────────────────────────────
+let currentTheme='cahaya';
+function loadTheme(){applyThemeUI(localStorage.getItem(THEME_KEY)||'cahaya');}
+function setTheme(t){currentTheme=t;localStorage.setItem(THEME_KEY,t);applyThemeUI(t);closeThemeDropdown();}
+function applyThemeUI(t){
+  currentTheme=t;
+  document.body.classList.toggle('tema-gelap',t==='gelap');
+  ['cahaya','gelap'].forEach(n=>{
+    const opt=document.getElementById('opt-'+n);
+    opt.classList.toggle('active-theme',n===t);
+    opt.querySelector('.theme-check').style.display=n===t?'':'none';
+  });
+}
+function toggleThemeDropdown(e){e.stopPropagation();document.getElementById('theme-dropdown').classList.toggle('open');}
+function closeThemeDropdown(){document.getElementById('theme-dropdown').classList.remove('open');}
+document.addEventListener('click',closeThemeDropdown);
+
+// ── HIJRIYAH (Umm al-Qura) ────────────────────────────────────────────────
+function jdn(gy,gm,gd){
+  if(gm<=2){gy--;gm+=12;}
+  const A=Math.floor(gy/100),B=2-A+Math.floor(A/4);
+  return Math.floor(365.25*(gy+4716))+Math.floor(30.6001*(gm+1))+gd+B-1524;
+}
+function hijriToJD(hy,hm,hd){
+  return Math.floor((11*hy+3)/30)+354*hy+30*hm-Math.floor((hm-1)/2)+hd+1948438-385+1;
+}
+function toHijri(gy,gm,gd){
+  const jd=jdn(gy,gm,gd);
+  let hy=Math.floor((30*(jd-1948438)+10646)/10631);
+  while(hijriToJD(hy+1,1,1)<=jd)hy++;
+  while(hijriToJD(hy,1,1)>jd)hy--;
+  let hm=1;
+  while(hm<12&&hijriToJD(hy,hm+1,1)<=jd)hm++;
+  return{year:hy,month:hm,day:jd-hijriToJD(hy,hm,1)+1};
+}
+function fromHijri(hy,hm,hd){
+  const jd=hijriToJD(hy,hm,hd);
+  const z=jd+1,a=Math.floor((z-1867216.25)/36524.25);
+  const b=z+1+a-Math.floor(a/4),c=b+1524;
+  const d=Math.floor((c-122.1)/365.25),e=Math.floor(365.25*d);
+  const f=Math.floor((c-e)/30.6001);
+  const gd=c-e-Math.floor(30.6001*f),gm=f<14?f-1:f-13;
+  return{year:gm>2?d-4716:d-4715,month:gm,day:gd};
+}
+
+// ── PASARAN ───────────────────────────────────────────────────────────────
+const REF_DATE=new Date(2000,0,1);
+function getPasaran(date){return PASARAN[((Math.floor((date-REF_DATE)/86400000)%5)+5)%5];}
+function getWeton(date){return DAYS_ID[date.getDay()]+" "+getPasaran(date);}
+// Pasaran index 0-4
+function getPasaranIdx(date){return((Math.floor((date-REF_DATE)/86400000)%5)+5)%5;}
+// Day-of-week 0-6
+function getWetonKey(date){return date.getDay()*5+getPasaranIdx(date);} // 0..34
+
+// ── OFFSET ────────────────────────────────────────────────────────────────
+let offsets={};
+function loadOffsets(){try{const s=localStorage.getItem(OFFSET_KEY);return s?JSON.parse(s):{};}catch{return{};}}
+function saveOffsets(){try{localStorage.setItem(OFFSET_KEY,JSON.stringify(offsets));}catch{}}
+function offKey(y,m){return`${y}-${m+1}`;}
+function getOffset(y,m){return offsets[offKey(y,m)]||0;}
+function changeOffset(d){
+  const k=offKey(calYear,calMonth);
+  offsets[k]=(offsets[k]||0)+d;
+  if(offsets[k]===0)delete offsets[k];
+  saveOffsets();renderCalendar();
+}
+function toHijriOff(gy,gm,gd,oy,om){
+  const off=getOffset(oy,om);if(!off)return toHijri(gy,gm,gd);
+  const dt=new Date(gy,gm-1,gd);dt.setDate(dt.getDate()+off);
+  return toHijri(dt.getFullYear(),dt.getMonth()+1,dt.getDate());
+}
+
+// ── HELPERS ───────────────────────────────────────────────────────────────
+function daysInMonth(y,m){return new Date(y,m+1,0).getDate();}
+function calcAge(ds){
+  const[y,m,d]=ds.split("-").map(Number),now=new Date();
+  let age=now.getFullYear()-y;
+  if(now.getMonth()+1<m||(now.getMonth()+1===m&&now.getDate()<d))age--;
+  return age;
+}
+// Usia tepat PADA tanggal tertentu (misal: saat ultah tiba)
+function calcAgeAtDate(birthds, atDate){
+  const[y,m,d]=birthds.split("-").map(Number);
+  let age=atDate.getFullYear()-y;
+  if(atDate.getMonth()+1<m||(atDate.getMonth()+1===m&&atDate.getDate()<d))age--;
+  return age;
+}
+// Usia dalam tahun Hijriyah saat ulang tahun Hijriyah berikutnya tiba
+function calcAgeHijriNext(birthds, birthtime){
+  const effDate=getBirthEffectiveDate(birthds, birthtime||'siang');
+  const ey=effDate.getFullYear(),em=effDate.getMonth()+1,ed=effDate.getDate();
+  const bh=toHijri(ey,em,ed); // Hijriyah lahir
+  const now=new Date();
+  const nh=toHijri(now.getFullYear(),now.getMonth()+1,now.getDate());
+  // Cari tahun Hijriyah ulang tahun berikutnya
+  let candidateHY=nh.year;
+  let tg=fromHijri(candidateHY,bh.month,bh.day);
+  let td=new Date(tg.year,tg.month-1,tg.day);
+  if(td<=now){candidateHY++;tg=fromHijri(candidateHY,bh.month,bh.day);td=new Date(tg.year,tg.month-1,tg.day);}
+  return candidateHY - bh.year;
+}
+// Usia Hijriyah PADA tanggal kalender tertentu (untuk marker di kalender)
+function calcAgeHijriAtGreg(birthds, birthtime, gregYear, gregMonth, gregDay){
+  const effDate=getBirthEffectiveDate(birthds, birthtime||'siang');
+  const ey=effDate.getFullYear(),em=effDate.getMonth()+1,ed=effDate.getDate();
+  const bh=toHijri(ey,em,ed); // Hijriyah lahir
+  const atH=toHijri(gregYear,gregMonth,gregDay); // Hijriyah tanggal yang diklik
+  return atH.year - bh.year;
+}
+function nextBdayGreg(ds){
+  const[,bm,bd]=ds.split("-").map(Number),now=new Date(),ty=now.getFullYear();
+  let next=new Date(ty,bm-1,bd);if(next<=now)next=new Date(ty+1,bm-1,bd);
+  return{date:next,daysLeft:Math.ceil((next-now)/86400000)};
+}
+function nextBdayHijri(ds, birthtime){
+  const effDate=getBirthEffectiveDate(ds, birthtime||'siang');
+  const ey=effDate.getFullYear(),em=effDate.getMonth()+1,ed=effDate.getDate();
+  const bh=toHijri(ey,em,ed);
+  const now=new Date(),nh=toHijri(now.getFullYear(),now.getMonth()+1,now.getDate());
+  let ty=nh.year;
+  let tg=fromHijri(ty,bh.month,bh.day);
+  let td=new Date(tg.year,tg.month-1,tg.day);
+  if(td<=now){ty++;tg=fromHijri(ty,bh.month,bh.day);td=new Date(tg.year,tg.month-1,tg.day);}
+  const ageH=ty-bh.year;
+  return{hijriDate:`${bh.day} ${HIJRI_MONTHS[bh.month-1]} ${ty} H`,gregDate:`${tg.day} ${MONTHS_ID[tg.month-1]} ${tg.year}`,daysLeft:Math.ceil((td-now)/86400000),ageH};
+}
+
+// ── MARKER COMPUTATION ────────────────────────────────────────────────────
+// Returns map: day (1-based) → { miladi:[], hijri:[], weton:[] }
+function buildMarkers(year, month){
+  const total=daysInMonth(year,month);
+  const map={};
+  for(let d=1;d<=total;d++) map[d]={miladi:[],hijri:[],weton:[]};
+
+  family.forEach(m=>{
+    if(!m.birthdate) return;
+    const[by,bm,bd]=m.birthdate.split("-").map(Number);
+
+    // 1. MILADIYAH — selalu di tanggal Masehi asli
+    if(bm===month+1){
+      map[bd].miladi.push(m);
+    }
+
+    // Tanggal efektif untuk weton & hijriyah
+    const effDate=getBirthEffectiveDate(m.birthdate, m.birthtime);
+    const ey=effDate.getFullYear(),em=effDate.getMonth()+1,ed=effDate.getDate();
+
+    // 2. HIJRIYAH — dari tanggal efektif
+    if(m.showHijri){
+      const bh=toHijri(ey,em,ed);
+      for(let tryY=0;tryY<=1;tryY++){
+        const nowH=toHijri(year,month+1,1);
+        const candidateHY=nowH.year+tryY;
+        const gDate=fromHijri(candidateHY,bh.month,bh.day);
+        if(gDate.month===month+1&&gDate.year===year){
+          const day=gDate.day;
+          if(day>=1&&day<=total) map[day].hijri.push(m);
+        }
+        const prevHY=nowH.year-1+tryY;
+        const gDate2=fromHijri(prevHY,bh.month,bh.day);
+        if(gDate2.month===month+1&&gDate2.year===year){
+          const day=gDate2.day;
+          if(day>=1&&day<=total&&!map[day].hijri.find(x=>x.id===m.id))
+            map[day].hijri.push(m);
+        }
+      }
+    }
+
+    // 3. WETON — dari tanggal efektif, setiap 35 hari
+    if(m.showWeton){
+      const bWetonKey=getWetonKey(effDate);
+      for(let d=1;d<=total;d++){
+        const date=new Date(year,month,d);
+        if(getWetonKey(date)===bWetonKey) map[d].weton.push(m);
+      }
+    }
+  });
+  return map;
+}
+
+// ── STATE ─────────────────────────────────────────────────────────────────
+const NOW=new Date();
+let calYear=NOW.getFullYear(),calMonth=NOW.getMonth(),selectedDay=null;
+let family=[],editId=null,currentDetailId=null;
+function loadFamily(){try{const s=localStorage.getItem(STORAGE_KEY);return s?JSON.parse(s):[];}catch{return[];}}
+function saveFamily(){try{localStorage.setItem(STORAGE_KEY,JSON.stringify(family));}catch{}}
+
+// ── PAGE NAV ──────────────────────────────────────────────────────────────
+function showPage(p){
+  document.querySelectorAll('.page').forEach(el=>el.classList.remove('active'));
+  document.getElementById('detail-page').style.display='none';
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  currentDetailId=null;
+  const fab=document.getElementById('konv-fab');
+  if(p==='calendar'){
+    document.getElementById('page-calendar').classList.add('active');
+    document.querySelectorAll('.tab-btn')[0].classList.add('active');
+    fab.style.display='flex';
+    renderCalendar();
+  } else {
+    document.getElementById('page-family').classList.add('active');
+    document.querySelectorAll('.tab-btn')[1].classList.add('active');
+    fab.style.display='none';
+    renderFamily();
+  }
+}
+
+// ── CALENDAR ──────────────────────────────────────────────────────────────
+function changeMonth(d){
+  calMonth+=d;
+  if(calMonth<0){calMonth=11;calYear--;}else if(calMonth>11){calMonth=0;calYear++;}
+  selectedDay=null;renderCalendar();
+}
+
+function renderCalendar(){
+  const off=getOffset(calYear,calMonth);
+  const hFirst=toHijriOff(calYear,calMonth+1,1,calYear,calMonth);
+  const hLast=toHijriOff(calYear,calMonth+1,daysInMonth(calYear,calMonth),calYear,calMonth);
+  const hijriLabel=hFirst.month===hLast.month
+    ?`${HIJRI_MONTHS[hFirst.month-1]} ${hFirst.year} H`
+    :`${HIJRI_MONTHS[hFirst.month-1]} – ${HIJRI_MONTHS[hLast.month-1]} ${hLast.year} H`;
+
+  document.getElementById('cal-month').textContent=MONTHS_ID[calMonth]+' '+calYear;
+  document.getElementById('cal-hijri-header').textContent=hijriLabel+(off?` · koreksi ${off>0?'+':''}${off}`:'');
+  document.getElementById('offset-val').textContent=(off>0?'+':'')+off;
+
+  const markers=buildMarkers(calYear,calMonth);
+  const fd=new Date(calYear,calMonth,1).getDay();
+  const total=daysInMonth(calYear,calMonth);
+  const td=NOW.getDate(),tm=NOW.getMonth(),ty=NOW.getFullYear();
+  const grid=document.getElementById('cal-grid');
+  grid.innerHTML='';
+
+  // Hari kosong sebelum hari pertama
+  for(let i=0;i<fd;i++) grid.appendChild(document.createElement('div'));
+
+  // Hari-hari bulan ini
+  for(let day=1;day<=total;day++){
+    const isToday=day===td&&calMonth===tm&&calYear===ty;
+    const isSel=day===selectedDay;
+    const h=toHijriOff(calYear,calMonth+1,day,calYear,calMonth);
+    const date=new Date(calYear,calMonth,day);
+    const dow=date.getDay(); // 0=Ahad,5=Jumat
+    const m=markers[day];
+
+    let dotsHtml='';
+    m.miladi.forEach(()=>{ dotsHtml+=`<div class="dot dot-miladi"></div>`; });
+    m.hijri.forEach(()=>{ dotsHtml+=`<div class="dot dot-hijri"></div>`; });
+    m.weton.forEach(()=>{ dotsHtml+=`<div class="dot dot-weton"></div>`; });
+    const hasAny=m.miladi.length||m.hijri.length||m.weton.length;
+
+    // Tentukan class warna angka
+    let numClass='day-num';
+    if(isToday) numClass+=' today-num';
+    else if(dow===0) numClass+=' ahad-num';
+    else if(dow===5) numClass+=' jumat-num';
+
+    const div=document.createElement('div');
+    let dayClass='cal-day'+(isSel?' selected':'')+(isToday?' today-day':'');
+    if(dow===0) dayClass+=' ahad-day';
+    else if(dow===5) dayClass+=' jumat-day';
+    div.className=dayClass;
+    div.innerHTML=`
+      <div class="day-top">
+        <span class="day-hijri-ar">${toArabic(h.day)}</span>
+        <span class="${numClass}">${day}</span>
+      </div>
+      <div class="day-pas">${getPasaran(date)}</div>
+      ${hasAny?`<div class="dot-row">${dotsHtml}</div>`:''}
+    `;
+    div.onclick=()=>{selectedDay=selectedDay===day?null:day;renderCalendar();if(selectedDay)renderDayDetail();};
+    grid.appendChild(div);
+  }
+
+  // Overflow: hari bulan berikutnya (abu-abu)
+  const totalCells=fd+total;
+  const remainder=totalCells%7;
+  const overflowCount=remainder===0?0:7-remainder;
+  for(let i=1;i<=overflowCount;i++){
+    const date=new Date(calYear,calMonth+1,i);
+    const h=toHijri(date.getFullYear(),date.getMonth()+1,date.getDate());
+    const dow=date.getDay();
+    let numClass='day-num overflow-num';
+    if(dow===0) numClass+=' ahad-num';
+    else if(dow===5) numClass+=' jumat-num';
+    let overflowClass='cal-day overflow-day';
+    if(dow===0) overflowClass+=' ahad-day';
+    else if(dow===5) overflowClass+=' jumat-day';
+    const div=document.createElement('div');
+    div.className=overflowClass;
+    div.innerHTML=`
+      <div class="day-top">
+        <span class="day-hijri-ar" style="opacity:.3">${toArabic(h.day)}</span>
+        <span class="${numClass}">${i}</span>
+      </div>
+      <div class="day-pas" style="opacity:.25">${getPasaran(date)}</div>
+    `;
+    grid.appendChild(div);
+  }
+
+  renderUpcoming();
+  if(selectedDay)renderDayDetail();
+  else document.getElementById('day-detail').style.display='none';
+}
+
+function renderDayDetail(){
+  const date=new Date(calYear,calMonth,selectedDay);
+  const h=toHijriOff(calYear,calMonth+1,selectedDay,calYear,calMonth);
+  const weton=getWeton(date);
+  const off=getOffset(calYear,calMonth);
+  const m=buildMarkers(calYear,calMonth)[selectedDay];
+
+  const det=document.getElementById('day-detail');
+  det.style.display='block';
+  document.getElementById('day-detail-title').textContent=
+    DAYS_ID[date.getDay()]+', '+selectedDay+' '+MONTHS_ID[calMonth]+' '+calYear;
+  document.getElementById('day-detail-grid').innerHTML=`
+    <div class="info-card">
+      <div class="info-lbl">HIJRIYAH${off?` (${off>0?'+':''}${off})`:''}</div>
+      <div class="info-val">${h.day} ${HIJRI_MONTHS[h.month-1]}</div>
+      <div class="info-sub">${h.year} H</div>
+    </div>
+    <div class="info-card">
+      <div class="info-lbl">WETON JAWA</div>
+      <div class="info-val">${weton}</div>
+    </div>`;
+
+  // Marker items
+  const hasAny=m.miladi.length||m.hijri.length||m.weton.length;
+  const bs=document.getElementById('day-marker-section');
+  if(!hasAny){bs.innerHTML='';return;}
+
+  let html=`<div class="marker-section"><div class="marker-section-title">PERINGATAN HARI INI</div>`;
+  m.miladi.forEach(p=>{
+    // Usia Masehi tepat pada hari ini (hari ultah)
+    const ageM=calcAgeAtDate(p.birthdate, new Date(calYear,calMonth,selectedDay));
+    html+=markerItem(p,'miladi','Ultah Masehi',`${ageM} tahun`);
+  });
+  m.hijri.forEach(p=>{
+    // Usia Hijriyah pada tanggal kalender yang dipilih
+    const ageH=calcAgeHijriAtGreg(p.birthdate, p.birthtime, calYear, calMonth+1, selectedDay);
+    html+=markerItem(p,'hijri','Ultah Hijriyah',`${ageH} tahun Hijriyah`);
+  });
+  m.weton.forEach(p=>{
+    const effD=getBirthEffectiveDate(p.birthdate, p.birthtime);
+    html+=markerItem(p,'weton','Weton',getWeton(effD));
+  });
+  html+='</div>';
+  bs.innerHTML=html;
+}
+
+function markerItem(m,type,badge,meta){
+  return`<div class="marker-item" onclick="openDetail('${m.id}')">
+    <span class="marker-badge badge-${type}">${badge}</span>
+    <div>
+      <div class="marker-name">${m.name}</div>
+      <div class="marker-meta">${m.role} · ${meta}</div>
+    </div>
+  </div>`;
+}
+
+function renderUpcoming(){
+  // Kumpulkan entri terpisah untuk M dan H
+  const entries=[];
+  family.filter(m=>m.birthdate).forEach(m=>{
+    // Masehi
+    const nb=nextBdayGreg(m.birthdate);
+    if(nb.daysLeft<=30){
+      const ageM=calcAgeAtDate(m.birthdate, nb.date);
+      entries.push({m, daysLeft:nb.daysLeft, isToday:nb.daysLeft===0, type:'M', age:ageM});
+    }
+    // Hijriyah — hanya jika toggle showHijri aktif
+    if(m.showHijri){
+      const nh=nextBdayHijri(m.birthdate, m.birthtime);
+      if(nh.daysLeft<=30){
+        entries.push({m, daysLeft:nh.daysLeft, isToday:nh.daysLeft===0, type:'H', age:nh.ageH, gregDate:nh.gregDate});
+      }
+    }
+  });
+
+  entries.sort((a,b)=>a.daysLeft-b.daysLeft);
+
+  const box=document.getElementById('upcoming-box');
+  if(!entries.length){box.style.display='none';return;}
+  box.style.display='block';
+
+  document.getElementById('upcoming-list').innerHTML=entries.map(e=>{
+    const isSoon=e.daysLeft<=7;
+    const daysLabel=e.isToday?'🎂 Hari ini!':`${e.daysLeft} hari lagi`;
+    const dotColor=e.type==='M'?'var(--dot-miladi)':'var(--dot-hijri)';
+    const typeLabel=e.type==='M'?'Masehi':'Hijriyah';
+    return`<div class="upcoming-row">
+      <div>
+        <span style="color:${ROLE_COLOR[e.m.role]||'#888'};margin-right:6px">●</span>
+        <span style="font-size:15px">${e.m.name}</span>
+        <span style="font-size:12px;color:var(--text3);margin-left:5px">(${e.m.role})</span>
+        <span style="font-size:10px;color:${dotColor};margin-left:4px;font-weight:700">● ${typeLabel}</span>
+      </div>
+      <div style="text-align:right">
+        <div class="upcoming-days${isSoon?' soon':''}">${daysLabel}</div>
+        <div style="font-size:11px;color:var(--text3);margin-top:2px">${e.age} th ${e.type}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── FAMILY ────────────────────────────────────────────────────────────────
+function renderFamily(){
+  const list=document.getElementById('fam-list');
+  if(!family.length){
+    list.innerHTML=`<div style="text-align:center;padding:52px 20px;border:2px dashed var(--border);border-radius:16px;color:var(--text3)">
+      <div style="font-size:40px;margin-bottom:14px">👨‍👩‍👧‍👦</div>
+      <div style="font-size:16px">Belum ada anggota keluarga</div>
+      <div style="font-size:13px;margin-top:6px">Klik "+ Tambah" untuk mulai</div></div>`;
+    return;
+  }
+  let html='';
+  ROLES.forEach(role=>{
+    const ms=family.filter(m=>m.role===role);if(!ms.length)return;
+    html+=`<div class="role-section"><div class="role-label" style="color:${ROLE_COLOR[role]||'#888'}">● ${role.toUpperCase()}</div>`;
+    ms.forEach(m=>{
+      const nb=m.birthdate?nextBdayGreg(m.birthdate):null;
+      // marker indicator dots
+      let markerDots='';
+      if(m.showHijri) markerDots+=`<div class="fam-marker-dot" style="background:var(--dot-hijri)" title="Ultah Hijriyah aktif"></div>`;
+      if(m.showWeton) markerDots+=`<div class="fam-marker-dot" style="background:var(--dot-weton)" title="Weton aktif"></div>`;
+      html+=`<div class="fam-card" style="border-left:3px solid ${ROLE_COLOR[m.role]||'#888'}" onclick="openDetail('${m.id}')">
+        <div>
+          <div class="fam-name">${m.name}</div>
+          ${m.birthdate?`<div class="fam-meta">${m.birthdate.split('-').reverse().join('/')} · ${calcAge(m.birthdate)} thn${m.birthtime?(' · '+(m.birthtime==='malam'?'🌙':'☀️')):' · ⚠️'}</div>`:''}
+        </div>
+        <div class="fam-right">
+          <div class="fam-markers">${markerDots}</div>
+          ${nb?`<div class="fam-days${nb.daysLeft<=7?' soon':''}">${nb.daysLeft===0?'🎂':nb.daysLeft+' hr'}</div>`:''}
+        </div>
+      </div>`;
+    });
+    html+='</div>';
+  });
+  list.innerHTML=html;
+}
+
+// ── DETAIL ────────────────────────────────────────────────────────────────
+function openDetail(id){
+  currentDetailId=id;
+  const m=family.find(f=>f.id===id);if(!m)return;
+  document.querySelectorAll('.page').forEach(el=>el.classList.remove('active'));
+  document.getElementById('detail-page').style.display='block';
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.tab-btn')[1].classList.add('active');
+  document.getElementById('detail-name').textContent=m.name;
+  document.getElementById('detail-role').textContent=m.role.toUpperCase();
+  document.getElementById('detail-role').style.color=ROLE_COLOR[m.role]||'#888';
+  // Toggles
+  document.getElementById('toggle-hijri').checked=!!m.showHijri;
+  document.getElementById('toggle-weton').checked=!!m.showWeton;
+
+  const infos=document.getElementById('detail-infos');
+  document.getElementById('detail-kartu-btn').style.display=m.birthdate?'block':'none';
+  if(!m.birthdate){infos.innerHTML='<div style="color:var(--text3);font-size:14px">Tanggal lahir belum diisi.</div>';return;}
+
+  const[by,bm,bd]=m.birthdate.split('-').map(Number);
+  // Gunakan tanggal efektif (geser +1 jika malam)
+  const effDate=getBirthEffectiveDate(m.birthdate, m.birthtime);
+  const ey=effDate.getFullYear(),em=effDate.getMonth()+1,ed=effDate.getDate();
+  const h=toHijri(ey,em,ed);
+  const nb=nextBdayGreg(m.birthdate);
+  const nh=nextBdayHijri(m.birthdate, m.birthtime);
+
+  // Warning jika birthtime belum diisi
+  const warnHtml=!m.birthtime?`<div class="birthtime-warn">⚠️ Waktu lahir belum diisi — weton & Hijriyah mungkin kurang akurat. <span style="text-decoration:underline;cursor:pointer" onclick="editCurrent()">Edit</span></div>`:'';
+
+  const btLabel=m.birthtime==='malam'?'🌙 Malam (setelah maghrib)':m.birthtime==='siang'?'☀️ Siang (sebelum maghrib)':'';
+  infos.innerHTML=warnHtml+[
+    ic('TANGGAL LAHIR',`${bd} ${MONTHS_ID[bm-1]} ${by}`,`Usia: ${calcAge(m.birthdate)} tahun · ${btLabel||'⚠️ Waktu lahir belum diisi'}`),
+    ic('HIJRIYAH (LAHIR)',`${h.day} ${HIJRI_MONTHS[h.month-1]} ${h.year} H`,
+      m.birthtime==='malam'?`Dihitung dari ${ed} ${MONTHS_ID[em-1]} (malam)`:'Hisab Umm al-Qura'),
+    ic('WETON JAWA',getWeton(effDate),
+      m.birthtime==='malam'?`Dari hari ${DAYS_ID[effDate.getDay()]} (lahir malam)`:''),
+    ic('ULANG TAHUN BERIKUTNYA',nb.daysLeft===0?'🎂 Hari ini!':nb.daysLeft+' hari lagi',
+      `${nb.date.getDate()} ${MONTHS_ID[nb.date.getMonth()]} ${nb.date.getFullYear()} · ${calcAgeAtDate(m.birthdate, nb.date)} tahun`,nb.daysLeft<=7),
+    ic('ULANG TAHUN HIJRIYAH',`${nh.ageH} tahun Hijriyah`,`${nh.hijriDate} = ${nh.gregDate} · ${nh.daysLeft} hari lagi`),
+  ].join('');
+}
+function ic(lbl,val,sub,hl){
+  return`<div class="info-card${hl?' highlight':''}">
+    <div class="info-lbl">${lbl}</div>
+    <div class="info-val${hl?' highlight':''}">${val}</div>
+    ${sub?`<div class="info-sub">${sub}</div>`:''}
+  </div>`;
+}
+function saveToggle(type){
+  if(!currentDetailId)return;
+  const val=document.getElementById('toggle-'+type).checked;
+  family=family.map(m=>m.id===currentDetailId?{...m,[type==='hijri'?'showHijri':'showWeton']:val}:m);
+  saveFamily();
+  renderCalendar(); // refresh markers
+}
+function closeDetail(){
+  document.getElementById('detail-page').style.display='none';
+  document.getElementById('page-family').classList.add('active');
+  document.querySelectorAll('.tab-btn')[1].classList.add('active');
+  renderFamily();currentDetailId=null;
+}
+function editCurrent(){if(currentDetailId)openForm(currentDetailId);}
+function deleteCurrent(){
+  if(!currentDetailId||!confirm('Hapus anggota ini?'))return;
+  family=family.filter(m=>m.id!==currentDetailId);
+  saveFamily();closeDetail();
+}
+
+// ── FORM ──────────────────────────────────────────────────────────────────
+let selectedBirthtime=null;
+function setBirthtime(val){
+  selectedBirthtime=val;
+  document.getElementById('btn-siang').className='birthtime-btn'+(val==='siang'?' active-siang':'');
+  document.getElementById('btn-malam').className='birthtime-btn'+(val==='malam'?' active-malam':'');
+}
+function openForm(id){
+  editId=id||null;
+  document.getElementById('modal-title').textContent=id?'Edit Anggota':'Tambah Anggota';
+  if(id){
+    const m=family.find(f=>f.id===id);
+    document.getElementById('f-name').value=m.name;
+    document.getElementById('f-role').value=m.role;
+    document.getElementById('f-date').value=m.birthdate||'';
+    setBirthtime(m.birthtime||null);
+  } else {
+    document.getElementById('f-name').value='';
+    document.getElementById('f-role').value='Saya';
+    document.getElementById('f-date').value='';
+    setBirthtime(null);
+  }
+  document.getElementById('modal-overlay').classList.add('open');
+}
+function closeForm(){document.getElementById('modal-overlay').classList.remove('open');}
+function submitForm(){
+  const name=document.getElementById('f-name').value.trim();
+  const role=document.getElementById('f-role').value;
+  const birthdate=document.getElementById('f-date').value;
+  if(!name||!birthdate)return alert('Nama dan tanggal lahir wajib diisi.');
+  if(!selectedBirthtime)return alert('Pilih waktu lahir: Siang atau Malam.');
+  const birthtime=selectedBirthtime;
+  if(editId) family=family.map(m=>m.id===editId?{...m,name,role,birthdate,birthtime}:m);
+  else family.push({id:Date.now().toString(),name,role,birthdate,birthtime,showHijri:false,showWeton:false});
+  saveFamily();closeForm();
+  if(document.getElementById('detail-page').style.display==='block'&&editId===currentDetailId)openDetail(editId);
+  renderCalendar();
+  if(document.getElementById('page-family').classList.contains('active'))renderFamily();
+}
+
+// ── EKSPOR / IMPOR ────────────────────────────────────────────────────────
+function openIO(){
+  ioMsg('','');
+  document.getElementById('io-overlay').classList.add('open');
+}
+function closeIO(){
+  document.getElementById('io-overlay').classList.remove('open');
+  // Reset file input agar bisa pilih file yang sama lagi
+  document.getElementById('import-file-input').value='';
+}
+function ioMsg(type,msg){
+  const el=document.getElementById('io-msg');
+  if(!msg){el.style.display='none';return;}
+  el.className='io-msg '+type;el.textContent=msg;el.style.display='block';
+}
+function doExport(){
+  const data={family,offsets,theme:currentTheme,exportedAt:new Date().toISOString(),version:3};
+  const json=JSON.stringify(data,null,2);
+  try{
+    const blob=new Blob([json],{type:'application/json'});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');
+    a.href=url;a.download='kalender-keluarga-backup.json';
+    document.body.appendChild(a);a.click();
+    document.body.removeChild(a);URL.revokeObjectURL(url);
+    ioMsg('ok','✓ File backup berhasil diunduh!');
+  } catch(e){
+    ioMsg('err','Gagal mengunduh file. Coba lagi.');
+  }
+}
+function triggerImport(){
+  ioMsg('','');
+  document.getElementById('import-file-input').click();
+}
+function doImportFile(event){
+  const file=event.target.files[0];
+  if(!file)return;
+  if(!file.name.endsWith('.json')){
+    ioMsg('err','File harus berformat .json');return;
+  }
+  const reader=new FileReader();
+  reader.onload=function(e){
+    try{
+      const data=JSON.parse(e.target.result);
+      if(!Array.isArray(data.family))throw new Error('Format tidak valid');
+      family=data.family;
+      if(data.offsets)offsets=data.offsets;
+      if(data.theme)setTheme(data.theme);
+      saveFamily();saveOffsets();
+      renderCalendar();
+      ioMsg('ok',`✓ Berhasil memuat ${family.length} anggota keluarga dari "${file.name}".`);
+    } catch{
+      ioMsg('err','Format file tidak valid. Pastikan menggunakan file backup yang benar.');
+    }
+    // Reset input agar bisa pilih file lagi
+    document.getElementById('import-file-input').value='';
+  };
+  reader.onerror=function(){ioMsg('err','Gagal membaca file. Coba lagi.');};
+  reader.readAsText(file);
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────
+family=loadFamily();
+offsets=loadOffsets();
+loadTheme();
+renderCalendar();
+
+// ── KONVERSI TANGGAL ──────────────────────────────────────────────────────
+// Nilai neptu hari (Minggu=5, Senin=4, Selasa=3, Rabu=7, Kamis=8, Jumat=6, Sabtu=9)
+const NEPTU_HARI=[5,4,3,7,8,6,9];
+// Nilai neptu pasaran (Legi=5, Pahing=9, Pon=7, Wage=4, Kliwon=8)
+const NEPTU_PASARAN=[5,9,7,4,8];
+
+function getNeptu(date){
+  const h=NEPTU_HARI[date.getDay()];
+  const p=NEPTU_PASARAN[getPasaranIdx(date)];
+  return{hari:h,pasaran:p,total:h+p};
+}
+
+let konvDate=null;
+
+function openKonv(){
+  // Set default input = hari ini
+  const t=new Date();
+  const pad=n=>String(n).padStart(2,'0');
+  const val=`${t.getFullYear()}-${pad(t.getMonth()+1)}-${pad(t.getDate())}`;
+  document.getElementById('konv-input').value=val;
+  document.getElementById('konv-overlay').classList.add('open');
+  doKonv();
+}
+function closeKonv(){
+  document.getElementById('konv-overlay').classList.remove('open');
+}
+
+function doKonv(){
+  const val=document.getElementById('konv-input').value;
+  if(!val){document.getElementById('konv-result').style.display='none';return;}
+  const[y,m,d]=val.split('-').map(Number);
+  const date=new Date(y,m-1,d);
+  konvDate={y,m,d,date};
+
+  const h=toHijri(y,m,d);
+  const weton=getWeton(date);
+  const pasaran=getPasaran(date);
+  const hari=DAYS_ID[date.getDay()];
+  const neptu=getNeptu(date);
+
+  document.getElementById('kr-hari').textContent=hari;
+  document.getElementById('kr-pasaran').textContent=pasaran;
+  document.getElementById('kr-hijri').textContent=`${h.day} ${HIJRI_MONTHS[h.month-1]} ${h.year} H`;
+  document.getElementById('kr-hijri-sub').textContent=`Hisab Umm al-Qura`;
+  document.getElementById('kr-neptu').textContent=neptu.total;
+  document.getElementById('kr-neptu-detail').textContent=
+    `${hari} (${neptu.hari}) + ${pasaran} (${neptu.pasaran}) = ${neptu.total}`;
+
+  document.getElementById('konv-result').style.display='block';
+}
+
+// ── EXPORT KARTU CANVAS ───────────────────────────────────────────────────
+const KARTU_W=720,KARTU_H=480;
+
+function buatKartu(){buatKartuDenganNama('');}
+
+function buatKartuDenganNama(nama){
+  if(!konvDate)return;
+  closeKonv();
+
+  const{y,m,d,date}=konvDate;
+  // Hijriyah & weton: pakai tanggal efektif jika ada info birthtime
+  const effDate=konvDate.birthtime
+    ? getBirthEffectiveDate(`${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`, konvDate.birthtime)
+    : date;
+  const ey=effDate.getFullYear(),em=effDate.getMonth()+1,ed2=effDate.getDate();
+  const h=toHijriOff(ey,em,ed2,y,m-1);
+  const hari=DAYS_ID[effDate.getDay()];
+  const pasaran=getPasaran(effDate);
+  const neptu=getNeptu(effDate);
+  const isDark=document.body.classList.contains('tema-gelap');
+
+  const canvas=document.getElementById('kartu-canvas');
+  const ctx=canvas.getContext('2d');
+  canvas.width=KARTU_W; canvas.height=KARTU_H;
+
+  // ── Background ──
+  if(isDark){
+    const grad=ctx.createLinearGradient(0,0,KARTU_W,KARTU_H);
+    grad.addColorStop(0,'#1a1320');
+    grad.addColorStop(0.5,'#0f1117');
+    grad.addColorStop(1,'#1a1d2a');
+    ctx.fillStyle=grad;
+  } else {
+    const grad=ctx.createLinearGradient(0,0,KARTU_W,KARTU_H);
+    grad.addColorStop(0,'#f5f2ec');
+    grad.addColorStop(0.6,'#eef6f4');
+    grad.addColorStop(1,'#e0f2ee');
+    ctx.fillStyle=grad;
+  }
+  ctx.fillRect(0,0,KARTU_W,KARTU_H);
+
+  // ── Decorative circles ──
+  const accent=isDark?'#c8956c':'#2d7a6a';
+  const accentAlpha=isDark?'#c8956c18':'#2d7a6a14';
+  ctx.beginPath();ctx.arc(KARTU_W-60,60,180,0,Math.PI*2);
+  ctx.fillStyle=accentAlpha;ctx.fill();
+  ctx.beginPath();ctx.arc(80,KARTU_H-60,120,0,Math.PI*2);
+  ctx.fillStyle=accentAlpha;ctx.fill();
+
+  // ── Border ──
+  ctx.strokeStyle=isDark?'#c8956c33':'#2d7a6a22';
+  ctx.lineWidth=1.5;
+  roundRect(ctx,18,18,KARTU_W-36,KARTU_H-36,14);ctx.stroke();
+
+  // ── Label atas / nama ──
+  ctx.fillStyle=isDark?'#888878':'#7aa8a0';
+  ctx.font='500 14px "DM Sans", sans-serif';
+  ctx.letterSpacing='3px';
+  ctx.fillText(nama?nama.toUpperCase():'KALENDER KELUARGA',48,60);
+  ctx.letterSpacing='0px';
+
+  // ── Tanggal Masehi (BESAR) ──
+  ctx.fillStyle=isDark?'#e8dcc8':'#1a3530';
+  const tglStr=`${d} ${MONTHS_ID[m-1]} ${y}`;
+  ctx.font=`600 80px "Crimson Pro", serif`;
+  if(ctx.measureText(tglStr).width>580) ctx.font=`600 62px "Crimson Pro", serif`;
+  ctx.fillText(tglStr,48,158);
+
+  // ── Divider ──
+  ctx.fillStyle=accent;ctx.fillRect(48,172,70,3);
+
+  // ── Weton ──
+  ctx.fillStyle=accent;
+  ctx.font=`600 36px "Crimson Pro", serif`;
+  ctx.fillText(`${hari} ${pasaran}`,48,222);
+
+  // ── Hijriyah ──
+  ctx.fillStyle=isDark?'#c8b89a':'#3d6b62';
+  ctx.font=`400 24px "Crimson Pro", serif`;
+  ctx.fillText(`${h.day} ${HIJRI_MONTHS[h.month-1]} ${h.year} H`,48,258);
+
+  // ── Usia (jika ada nama = dari anggota) ──
+  if(nama){
+    const usia=calcAge(`${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`);
+    ctx.fillStyle=isDark?'#888878':'#7aa8a0';
+    ctx.font=`400 18px "DM Sans", sans-serif`;
+    ctx.fillText(`Usia: ${usia} tahun`,48,292);
+  }
+
+  // ── Kotak Neptu ──
+  const boxX=KARTU_W-212,boxY=KARTU_H-178,boxW=172,boxH=132;
+  ctx.fillStyle=isDark?'#c8956c18':'#e0f2ee';
+  ctx.strokeStyle=isDark?'#c8956c44':'#2d7a6a33';
+  ctx.lineWidth=1;
+  roundRect(ctx,boxX,boxY,boxW,boxH,12);ctx.fill();ctx.stroke();
+
+  ctx.fillStyle=isDark?'#888878':'#7aa8a0';
+  ctx.font='700 11px "DM Sans", sans-serif';
+  ctx.letterSpacing='2px';
+  const lNeptu='NEPTU';
+  ctx.fillText(lNeptu,boxX+boxW/2-ctx.measureText(lNeptu).width/2,boxY+26);
+  ctx.letterSpacing='0px';
+
+  ctx.fillStyle=accent;
+  ctx.font=`700 62px "Crimson Pro", serif`;
+  const ntxt=String(neptu.total);
+  ctx.fillText(ntxt,boxX+boxW/2-ctx.measureText(ntxt).width/2,boxY+90);
+
+  ctx.fillStyle=isDark?'#888878':'#7aa8a0';
+  ctx.font='400 12px "DM Sans", sans-serif';
+  const nsub=`${hari[0]}(${neptu.hari}) + ${pasaran[0]}(${neptu.pasaran})`;
+  ctx.fillText(nsub,boxX+boxW/2-ctx.measureText(nsub).width/2,boxY+112);
+
+  // ── Footer ──
+  ctx.fillStyle=isDark?'#c8956c44':'#2d7a6a44';
+  ctx.font='400 12px "DM Sans", sans-serif';
+  ctx.fillText('Kalender Keluarga · Masehi · Hijriyah · Jawa',48,KARTU_H-22);
+
+  document.getElementById('kartu-overlay').classList.add('open');
+}
+
+function roundRect(ctx,x,y,w,h,r){
+  ctx.beginPath();
+  ctx.moveTo(x+r,y);
+  ctx.lineTo(x+w-r,y);
+  ctx.quadraticCurveTo(x+w,y,x+w,y+r);
+  ctx.lineTo(x+w,y+h-r);
+  ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
+  ctx.lineTo(x+r,y+h);
+  ctx.quadraticCurveTo(x,y+h,x,y+h-r);
+  ctx.lineTo(x,y+r);
+  ctx.quadraticCurveTo(x,y,x+r,y);
+  ctx.closePath();
+}
+
+function buatKartuDariKalender(){
+  if(!selectedDay)return;
+  konvDate={
+    y:calYear,m:calMonth+1,d:selectedDay,
+    date:new Date(calYear,calMonth,selectedDay)
+  };
+  buatKartu();
+}
+
+function buatKartuAnggota(){
+  if(!currentDetailId)return;
+  const m=family.find(f=>f.id===currentDetailId);
+  if(!m||!m.birthdate)return;
+  // Untuk kartu: tampilkan tanggal Masehi asli, tapi weton/hijriyah dari tanggal efektif
+  const[y,mo,d]=m.birthdate.split('-').map(Number);
+  // konvDate pakai tanggal asli untuk display, tapi flag birthtime ikut
+  konvDate={y,m:mo,d,date:new Date(y,mo-1,d),birthtime:m.birthtime};
+  buatKartuDenganNama(m.name);
+}
+
+function simpanKartu(){
+  if(!konvDate)return;
+  const{y,m,d}=konvDate;
+  const canvas=document.getElementById('kartu-canvas');
+  const a=document.createElement('a');
+  a.href=canvas.toDataURL('image/png');
+  a.download=`kalender-${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}.png`;
+  a.click();
+}
+
+function closeKartu(){
+  document.getElementById('kartu-overlay').classList.remove('open');
+}
+</script>
+</body>
+</html>
