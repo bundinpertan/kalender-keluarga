@@ -3,7 +3,24 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Kalender Keluarga</title>
+<title>Kalender Keluarga — Masehi · Hijriyah · Jawa</title>
+
+<!-- ── FAVICON ── -->
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120'%3E%3Crect fill='%23e0f2ee' x='10' y='20' width='100' height='90' rx='14'/%3E%3Crect fill='%232d7a6a' x='10' y='20' width='100' height='32' rx='14'/%3E%3Crect fill='%232d7a6a' x='10' y='38' width='100' height='14'/%3E%3Crect fill='%231a3530' x='33' y='12' width='9' height='20' rx='4.5'/%3E%3Crect fill='%231a3530' x='78' y='12' width='9' height='20' rx='4.5'/%3E%3Ccircle fill='%232d7a6a' cx='60' cy='67' r='9.5'/%3E%3Cpath fill='%232d7a6a' d='M43 102 Q43 83 60 83 Q77 83 77 102'/%3E%3Ccircle fill='%235b9e8f' cx='37' cy='71' r='7.5'/%3E%3Cpath fill='%235b9e8f' d='M22 102 Q22 87 37 87 Q52 87 52 102'/%3E%3Ccircle fill='%237ec8b8' cx='83' cy='75' r='6'/%3E%3Cpath fill='%237ec8b8' d='M71 102 Q71 89 83 89 Q95 89 95 102'/%3E%3Cpath fill='%23e0f2ee' d='M10 101 H110 V106 Q110 110 106 110 H14 Q10 110 10 106 Z'/%3E%3C/svg%3E"/>
+
+<!-- ── OPEN GRAPH / WhatsApp thumbnail ── -->
+<meta property="og:type" content="website"/>
+<meta property="og:url" content="https://kalenderkeluarga.web.id"/>
+<meta property="og:title" content="Kalender Keluarga — Masehi · Hijriyah · Jawa"/>
+<meta property="og:description" content="Aplikasi kalender keluarga lengkap: Masehi, Hijriyah, dan Weton Jawa dalam satu tampilan. Pengingat ulang tahun, konversi tanggal, kartu tanggal, dan lebih banyak lagi."/>
+<meta property="og:image" content="https://kalenderkeluarga.web.id/og-image.png"/>
+<meta property="og:image:width" content="1200"/>
+<meta property="og:image:height" content="630"/>
+<meta property="og:locale" content="id_ID"/>
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:image" content="https://kalenderkeluarga.web.id/og-image.png"/>
+<meta name="description" content="Aplikasi kalender keluarga: Masehi, Hijriyah, dan Weton Jawa dalam satu tampilan. Pengingat ulang tahun, konversi tanggal, dan kartu tanggal."/>
+
 <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,400&family=DM+Sans:wght@300;400;500;700&display=swap" rel="stylesheet"/>
 <style>
 :root {
@@ -22,6 +39,14 @@
   --dot-hijri:#16a34a;
   --dot-weton:#ca8a04;
   --radius:10px;
+  /* Logo adaptif */
+  --logo-body:#e0f2ee;
+  --logo-header:#2d7a6a;
+  --logo-ring:#1a3530;
+  --logo-fig1:#2d7a6a;
+  --logo-fig2:#5b9e8f;
+  --logo-fig3:#7ec8b8;
+  --logo-clip:#e0f2ee;
 }
 body.tema-gelap {
   --bg:#0f1117; --bg2:#141720; --bg3:#1a1d2a; --bg4:#1e2130;
@@ -38,6 +63,14 @@ body.tema-gelap {
   --dot-hijri:#22c55e;
   --dot-weton:#eab308;
   --note-color:#c8956c33;
+  /* Logo adaptif */
+  --logo-body:#1e2535;
+  --logo-header:#1a3530;
+  --logo-ring:#0f1117;
+  --logo-fig1:#5b9e8f;
+  --logo-fig2:#7ec8b8;
+  --logo-fig3:#a0d8cc;
+  --logo-clip:#1e2535;
 }
 *{box-sizing:border-box;margin:0;padding:0}
 body{min-height:100vh;background:var(--bg);font-family:'DM Sans',sans-serif;color:var(--text);transition:background .3s,color .3s;-webkit-tap-highlight-color:transparent}
@@ -48,6 +81,14 @@ button{font-family:inherit;cursor:pointer}
 
 /* HEADER */
 #header{background:var(--header-bg);border-bottom:1px solid var(--header-border);padding:10px 14px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:20;box-shadow:var(--shadow);transition:background .3s,border-color .3s}
+#header-left{display:flex;align-items:center;gap:10px}
+#header-logo .logo-body{fill:var(--logo-body);transition:fill .35s}
+#header-logo .logo-header{fill:var(--logo-header);transition:fill .35s}
+#header-logo .logo-ring{fill:var(--logo-ring);transition:fill .35s}
+#header-logo .logo-fig1{fill:var(--logo-fig1);transition:fill .35s}
+#header-logo .logo-fig2{fill:var(--logo-fig2);transition:fill .35s}
+#header-logo .logo-fig3{fill:var(--logo-fig3);transition:fill .35s}
+#header-logo .logo-clip{fill:var(--logo-clip);transition:fill .35s}
 #header-title{font-family:'Crimson Pro',serif;font-size:20px;color:var(--accent);letter-spacing:.5px;font-weight:600}
 #header-sub{font-size:10px;color:var(--text3);letter-spacing:1.5px;margin-top:1px;font-weight:400}
 .header-right{display:flex;gap:6px;align-items:center}
@@ -296,9 +337,26 @@ body.tema-gelap #konv-fab{background:var(--accent);box-shadow:0 4px 18px #c8956c
 <body>
 
 <div id="header">
-  <div>
-    <div id="header-title">Kalender Keluarga</div>
-    <div id="header-sub">Masehi · Hijriyah · Jawa</div>
+  <div id="header-left">
+    <!-- Logo adaptif -->
+    <svg id="header-logo" width="36" height="36" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+      <rect class="logo-body" x="10" y="20" width="100" height="90" rx="14"/>
+      <rect class="logo-header" x="10" y="20" width="100" height="32" rx="14"/>
+      <rect class="logo-header" x="10" y="38" width="100" height="14"/>
+      <rect class="logo-ring" x="33" y="12" width="9" height="20" rx="4.5"/>
+      <rect class="logo-ring" x="78" y="12" width="9" height="20" rx="4.5"/>
+      <circle class="logo-fig1" cx="60" cy="67" r="9.5"/>
+      <path class="logo-fig1" d="M43 102 Q43 83 60 83 Q77 83 77 102"/>
+      <circle class="logo-fig2" cx="37" cy="71" r="7.5"/>
+      <path class="logo-fig2" d="M22 102 Q22 87 37 87 Q52 87 52 102"/>
+      <circle class="logo-fig3" cx="83" cy="75" r="6"/>
+      <path class="logo-fig3" d="M71 102 Q71 89 83 89 Q95 89 95 102"/>
+      <path class="logo-clip" d="M10 101 H110 V106 Q110 110 106 110 H14 Q10 110 10 106 Z"/>
+    </svg>
+    <div>
+      <div id="header-title">Kalender Keluarga</div>
+      <div id="header-sub">Masehi · Hijriyah · Jawa</div>
+    </div>
   </div>
   <div class="header-right">
     <button class="tab-btn active" onclick="showPage('calendar')">📅 Kalender</button>
