@@ -21,6 +21,18 @@
 <meta name="twitter:image" content="https://kalenderkeluarga.web.id/og-image.png"/>
 <meta name="description" content="Aplikasi kalender keluarga: Masehi, Hijriyah, dan Weton Jawa dalam satu tampilan. Pengingat ulang tahun, konversi tanggal, dan kartu tanggal."/>
 
+<!-- Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-0L17HD466B"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-0L17HD466B');
+  function gaEvent(action, params){
+    if(typeof gtag === 'function') gtag('event', action, params || {});
+  }
+</script>
+
 <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,400&family=DM+Sans:wght@300;400;500;700&display=swap" rel="stylesheet"/>
 <style>
 :root {
@@ -910,6 +922,7 @@ function saveFamily(){try{localStorage.setItem(STORAGE_KEY,JSON.stringify(family
 
 // ── PAGE NAV ──────────────────────────────────────────────────────────────
 function showPage(p){
+  gaEvent('tab_buka', {tab_name: p});
   document.querySelectorAll('.page').forEach(el=>el.classList.remove('active'));
   document.getElementById('detail-page').style.display='none';
   document.querySelectorAll('.bnav-btn').forEach(b=>b.classList.remove('active'));
@@ -1266,6 +1279,7 @@ function submitForm(){
   const birthtime=selectedBirthtime;
   if(editId) family=family.map(m=>m.id===editId?{...m,name,role,birthdate,birthtime}:m);
   else family.push({id:Date.now().toString(),name,role,birthdate,birthtime,showHijri:false,showWeton:false});
+  gaEvent(editId ? 'anggota_diedit' : 'anggota_ditambah', {role: role});
   saveFamily();closeForm();
   if(document.getElementById('detail-page').style.display==='block'&&editId===currentDetailId)openDetail(editId);
   renderCalendar();
@@ -1313,6 +1327,7 @@ function doExport(){
     document.body.appendChild(a);a.click();
     document.body.removeChild(a);URL.revokeObjectURL(url);
     exportMsg('ok','✓ File backup berhasil diunduh!');
+    gaEvent('ekspor_berhasil');
   } catch(e){
     exportMsg('err','Gagal mengunduh file. Coba lagi.');
   }
@@ -1338,6 +1353,7 @@ function doImportFile(event){
       saveFamily();saveOffsets();
       renderCalendar();
       importMsg('ok',`✓ Berhasil memuat ${family.length} anggota keluarga dari "${file.name}".`);
+      gaEvent('impor_berhasil', {jumlah_anggota: family.length});
     } catch{
       importMsg('err','Format file tidak valid. Pastikan menggunakan file backup yang benar.');
     }
@@ -1368,6 +1384,7 @@ function getNeptu(date){
 let konvDate=null;
 
 function openKonv(){
+  gaEvent('konversi_buka');
   // Set default input = hari ini
   const t=new Date();
   const pad=n=>String(n).padStart(2,'0');
@@ -1407,7 +1424,7 @@ function doKonv(){
 // ── EXPORT KARTU CANVAS ───────────────────────────────────────────────────
 const KARTU_W=720,KARTU_H=480;
 
-function buatKartu(){buatKartuDenganNama('');}
+function buatKartu(){gaEvent('kartu_dibuat');buatKartuDenganNama('');}
 
 function buatKartuDenganNama(nama){
   if(!konvDate)return;
@@ -1571,6 +1588,7 @@ function simpanKartu(){
 
 
 function openInfo(){
+  gaEvent('tentang_buka');
   document.getElementById('info-overlay').classList.add('open');
 }
 function closeInfo(){
